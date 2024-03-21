@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<RepositoryUrl>https://github.com/OpenSourceKingdom/OSK.DataStructures</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Description>Various data structures that may prove useful to projects and other developers</Description>
+		<PackageTags>OpenSourceKingdom, OpenSource, Data, Structure, Common, Shared, Utility, Helper</PackageTags>
+		<Authors>BlankDev117</Authors>
+		<Title>OSK.DataStructures.Common</Title>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+
+</Project>
