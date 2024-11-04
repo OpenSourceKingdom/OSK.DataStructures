@@ -8,10 +8,16 @@
 		<PackageTags>OpenSourceKingdom, OpenSource, Data, Structure, Common, Shared, Utility, Helper</PackageTags>
 		<Authors>BlankDev117</Authors>
 		<Title>OSK.DataStructures.Common</Title>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>CS1591</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+	</ItemGroup>
 
 </Project>
