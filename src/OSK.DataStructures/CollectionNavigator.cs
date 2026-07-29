@@ -28,18 +28,25 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
 
     #region ICollectionNavigator
 
+    /// <inheritdoc/>
     public bool WrapNavigation { get; }
 
+    /// <inheritdoc/>
     public int Count => _items.Count;
 
-    public T Current => _items[CurrentIndex];
+    /// <inheritdoc/>
+    public T? Current => _items[CurrentIndex];
 
+    /// <inheritdoc/>
     public int CurrentIndex { get; private set; }
 
+    /// <inheritdoc/>
     public bool HasNext => WrapNavigation || CurrentIndex < _items.Count - 1;
 
+    /// <inheritdoc/>
     public bool HasPrevious => WrapNavigation || CurrentIndex > 0;
 
+    /// <inheritdoc/>
     public bool Next()
     {
         if (!WrapNavigation && CurrentIndex >= Count - 1)
@@ -54,6 +61,7 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
         return true;
     }
 
+    /// <inheritdoc/>
     public bool Previous()
     {
         if (!WrapNavigation && CurrentIndex <= 0)
@@ -68,6 +76,7 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
         return true;
     }
 
+    /// <inheritdoc/>
     public bool TryNavigate(int index)
     {
         if (index < 0 || index >= _items.Count)

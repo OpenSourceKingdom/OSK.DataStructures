@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace OSK.DataStructures;
@@ -22,21 +23,25 @@ public class BiMap<TLeft, TRight>: IBiMap<TLeft, TRight>
     {
     }
 
-    /// <summary>
-    /// Creates a <see cref="BiMap{TLeft, TRight}"/> using the map entries provided
-    /// </summary>
-    /// <param name="entries">The map entries to include in this map</param>
+    /// <inheritdoc/>
     public BiMap(IEnumerable<MapEntry<TLeft, TRight>> entries)
     {
+        if (entries == null)
+        {
+            throw new ArgumentNullException(nameof(entries));
+        }
+
         AddRangeBiMap(entries);
     }
 
-    /// <summary>
-    /// Creates a <see cref="BiMap{TLeft, TRight}"/> using the map entries provided
-    /// </summary>
-    /// <param name="entries">The map entries to include in this map</param>
+    /// <inheritdoc/>
     public BiMap(IEnumerable<MapEntry<TRight, TLeft>> entries)
     {
+        if (entries == null)
+        {
+            throw new ArgumentNullException(nameof(entries));
+        }
+
         AddRangeBiMap(entries);
     }
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace OSK.DataStructures.UnitTests;
+﻿namespace OSK.DataStructures.UnitTests;
 
 public class CollectionNavigatorTests
 {

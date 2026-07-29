@@ -1,21 +1,8 @@
-﻿using System.Collections.Generic;
-
-namespace OSK.DataStructures.UnitTests;
+﻿namespace OSK.DataStructures.UnitTests;
 
 public class BiMapTests
 {
-    #region Variables
-
-    private readonly BiMap<string, int> _biMap;
-
-    #endregion
-
     #region Constructors
-
-    public BiMapTests()
-    {
-        _biMap = new BiMap<string, int>();
-    }
 
     [Fact]
     public void DefaultConstructor_CreatesEmptyBiMap_CountIsZero()
@@ -23,12 +10,17 @@ public class BiMapTests
         // Arrange
         var bimap = new BiMap<string, int>();
 
-        // Act
-
-        // Assert
+        // Act/Assert
         Assert.Equal(0, bimap.Count);
         Assert.Empty(bimap.Left);
         Assert.Empty(bimap.Right);
+    }
+
+    [Fact]
+    public void Constructor_NullEntries_LeftRight_ThrowsArgumentNullException()
+    {
+        // Arrange/Act/ Assert
+        Assert.Throws<ArgumentNullException>(() => new BiMap<string, int>((IEnumerable<MapEntry<string, int>>)null!));
     }
 
     [Fact]
@@ -62,6 +54,13 @@ public class BiMapTests
     }
 
     [Fact]
+    public void Constructor_NullEntries_RightLeft_ThrowsArgumentNullException()
+    {
+        // Arrange/Act/ Assert
+        Assert.Throws<ArgumentNullException>(() => new BiMap<string, int>((IEnumerable<MapEntry<int, string>>)null!));
+    }
+
+    [Fact]
     public void Constructor_WithReversedEntries_PopulatesCorrectly()
     {
         // Arrange
@@ -80,6 +79,30 @@ public class BiMapTests
         Assert.Equal("two", bimap[2]);
         Assert.Equal(1, bimap["one"]);
         Assert.Equal(2, bimap["two"]);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(10)]
+    public void AddRangeConstructor_WithMultipleEntries_PopulatesCorrectly(int count)
+    {
+        // Arrange
+        var entries = new MapEntry<string, int>[count];
+        for (int i = 0; i < count; i++)
+        {
+            entries[i] = new MapEntry<string, int>($"key{i}", i);
+        }
+
+        // Act
+        var bimap = new BiMap<string, int>(entries);
+
+        // Assert
+        Assert.Equal(count, bimap.Count);
+        for (int i = 0; i < count; i++)
+        {
+            Assert.Equal(i, bimap[$"key{i}"]);
+            Assert.Equal($"key{i}", bimap[i]);
+        }
     }
 
     #endregion
@@ -122,7 +145,7 @@ public class BiMapTests
     #region Left
 
     [Fact]
-    public void Left_ReturnsAllKeys()
+    public void Left_ReturnsLeftItems()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -147,7 +170,7 @@ public class BiMapTests
     #region Right
 
     [Fact]
-    public void Right_ReturnsAllValues()
+    public void Right_ReturnsRightItems()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -172,7 +195,7 @@ public class BiMapTests
     #region Indexer
 
     [Fact]
-    public void Indexer_LeftKeyGetter_ReturnsValue()
+    public void Indexer_LeftGetter_ReturnsRightItem()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -188,7 +211,7 @@ public class BiMapTests
     }
 
     [Fact]
-    public void Indexer_LeftKeySetter_AddsEntry()
+    public void Indexer_LeftSetter_AddsEntry()
     {
         // Arrange
         var bimap = new BiMap<string, int>();
@@ -203,12 +226,12 @@ public class BiMapTests
     }
 
     [Fact]
-    public void Indexer_RightKeyGetter_ReturnsKey()
+    public void Indexer_RightGetter_ReturnsLeft()
     {
         // Arrange
         var bimap = new BiMap<string, int>
         {
-            ["name"] = 99,
+            [99] = "name",
         };
 
         // Act
@@ -219,7 +242,7 @@ public class BiMapTests
     }
 
     [Fact]
-    public void Indexer_RightKeySetter_AddsEntry()
+    public void Indexer_RightSetter_AddsEntry()
     {
         // Arrange
         var bimap = new BiMap<string, int>();
@@ -272,7 +295,7 @@ public class BiMapTests
     #region Remove
 
     [Fact]
-    public void Remove_LeftKey_RemovesBidirectionally()
+    public void Remove_Left_RemovesBidirectionally()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -292,7 +315,7 @@ public class BiMapTests
     }
 
     [Fact]
-    public void Remove_RightKey_RemovesBidirectionally()
+    public void Remove_Right_RemovesBidirectionally()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -350,7 +373,7 @@ public class BiMapTests
     #region TryGetEntry
 
     [Fact]
-    public void TryGetEntry_FoundKey_ReturnsTrueWithRightValue()
+    public void TryGetEntry_FoundLeft_ReturnsTrueWithRight()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -367,7 +390,7 @@ public class BiMapTests
     }
 
     [Fact]
-    public void TryGetEntry_NotFoundKey_ReturnsFalseWithDefault()
+    public void TryGetEntry_NotFoundLeft_ReturnsFalseWithDefault()
     {
         // Arrange
         var bimap = new BiMap<string, int>();
@@ -385,7 +408,7 @@ public class BiMapTests
     #region TryGetValue
 
     [Fact]
-    public void TryGetValue_FoundKey_ReturnsTrueWithLeftValue()
+    public void TryGetValue_FoundKey_ReturnsTrueWithRight()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -402,7 +425,7 @@ public class BiMapTests
     }
 
     [Fact]
-    public void TryGetValue_NotFoundKey_ReturnsFalseWithDefault()
+    public void TryGetValue_NotFoundRight_ReturnsFalseWithDefault()
     {
         // Arrange
         var bimap = new BiMap<string, int>();
@@ -420,7 +443,7 @@ public class BiMapTests
     #region Contains
 
     [Fact]
-    public void Contains_LeftKey_Existing_ReturnsTrue()
+    public void Contains_Left_Existing_ReturnsTrue()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -436,7 +459,7 @@ public class BiMapTests
     }
 
     [Fact]
-    public void Contains_LeftKey_NotExisting_ReturnsFalse()
+    public void Contains_Left_NotExisting_ReturnsFalse()
     {
         // Arrange
         var bimap = new BiMap<string, int>();
@@ -449,7 +472,7 @@ public class BiMapTests
     }
 
     [Fact]
-    public void Contains_RightKey_Existing_ReturnsTrue()
+    public void Contains_Right_Existing_ReturnsTrue()
     {
         // Arrange
         var bimap = new BiMap<string, int>
@@ -465,7 +488,7 @@ public class BiMapTests
     }
 
     [Fact]
-    public void Contains_RightKey_NotExisting_ReturnsFalse()
+    public void Contains_Right_NotExisting_ReturnsFalse()
     {
         // Arrange
         var bimap = new BiMap<string, int>();
@@ -550,34 +573,6 @@ public class BiMapTests
 
         // Assert
         Assert.Empty(entries);
-    }
-
-    #endregion
-
-    #region AddRangeConstructor
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(10)]
-    public void AddRangeConstructor_WithMultipleEntries_PopulatesCorrectly(int count)
-    {
-        // Arrange
-        var entries = new MapEntry<string, int>[count];
-        for (int i = 0; i < count; i++)
-        {
-            entries[i] = new MapEntry<string, int>($"key{i}", i);
-        }
-
-        // Act
-        var bimap = new BiMap<string, int>(entries);
-
-        // Assert
-        Assert.Equal(count, bimap.Count);
-        for (int i = 0; i < count; i++)
-        {
-            Assert.Equal(i, bimap[$"key{i}"]);
-            Assert.Equal($"key{i}", bimap[i]);
-        }
     }
 
     #endregion
