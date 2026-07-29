@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace OSK.DataStructures;
 
@@ -7,11 +8,21 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
     #region Variables
 
     private readonly IReadOnlyList<T> _items;
-    private int _currentIndex;
 
     #endregion
 
     #region Constructors
+
+    public CollectionNavigator(IEnumerable<T> items)
+        : this(items, false)
+    {
+    }
+
+    public CollectionNavigator(IEnumerable<T> items, bool wrapNavigation)
+    {
+        _items = items is null ? throw new ArgumentNullException(nameof(items)) : [.. items];
+        WrapNavigation = wrapNavigation;
+    }
 
     #endregion
 
@@ -21,27 +32,55 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
 
     public int Count => _items.Count;
 
-    public T Current => _items[_currentIndex];
+    public T Current => _items[CurrentIndex];
 
-    public int CurrentIndex => throw new System.NotImplementedException();
+    public int CurrentIndex { get; private set; }
 
-    public bool HasNext => throw new System.NotImplementedException();
+    public bool HasNext => WrapNavigation || CurrentIndex < _items.Count;
 
-    public bool HasPrevious => throw new System.NotImplementedException();
+    public bool HasPrevious => WrapNavigation || CurrentIndex > 0;
 
     public bool Next()
     {
-        throw new System.NotImplementedException();
+        if (!WrapNavigation && CurrentIndex >= Count)
+        {
+            return false;
+        }
+
+        CurrentIndex++;
+        if (CurrentIndex >= Count)
+        {
+            CurrentIndex = 0;
+        }
+
+        return true;
     }
 
     public bool Previous()
     {
-        throw new System.NotImplementedException();
+        if (!WrapNavigation && CurrentIndex is 0)
+        {
+            return false;
+        }
+
+        CurrentIndex--;
+        if (CurrentIndex < 0)
+        {
+            CurrentIndex = _items.Count - 1;
+        }
+
+        return true;
     }
 
     public bool TryNavigate(int index)
     {
-        throw new System.NotImplementedException();
+        if (index < 0 || index >= _items.Count)
+        {
+            return false;
+        }
+
+        CurrentIndex = index;
+        return true;
     }
 
     #endregion
