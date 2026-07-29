@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="OSK.DataStructures.UnitTests/OSK.DataStructures.UnitTests.csproj" Id="c91dd517-2e93-4ff1-9950-f86192041ff5" />
+  <Project Path="OSK.DataStructures/OSK.DataStructures.csproj" />
+</Solution>
