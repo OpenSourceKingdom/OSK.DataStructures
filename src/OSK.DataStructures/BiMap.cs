@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace OSK.DataStructures;
 
@@ -16,18 +15,29 @@ public class BiMap<TLeft, TRight>: IBiMap<TLeft, TRight>
 
     #region Constructors
 
+    /// <summary>
+    /// Creates an empty <see cref="BiMap{TLeft, TRight}"/>
+    /// </summary>
     public BiMap()
     {
     }
 
-    public BiMap(IEnumerable<MapEntry<TLeft, TRight>> pairs)
+    /// <summary>
+    /// Creates a <see cref="BiMap{TLeft, TRight}"/> using the map entries provided
+    /// </summary>
+    /// <param name="entries">The map entries to include in this map</param>
+    public BiMap(IEnumerable<MapEntry<TLeft, TRight>> entries)
     {
-        AddRangeBiMap(pairs);
+        AddRangeBiMap(entries);
     }
 
-    public BiMap(IEnumerable<MapEntry<TRight, TLeft>> pairs)
+    /// <summary>
+    /// Creates a <see cref="BiMap{TLeft, TRight}"/> using the map entries provided
+    /// </summary>
+    /// <param name="entries">The map entries to include in this map</param>
+    public BiMap(IEnumerable<MapEntry<TRight, TLeft>> entries)
     {
-        AddRangeBiMap(pairs);
+        AddRangeBiMap(entries);
     }
 
     #endregion
@@ -104,11 +114,11 @@ public class BiMap<TLeft, TRight>: IBiMap<TLeft, TRight>
     }
 
     /// <inheritdoc/>
-    public bool TryGetEntry(TLeft left, out TRight right)
+    public bool TryGetEntry(TLeft left, out TRight? right)
         => _forwardLookup.TryGetValue(left, out right);
 
     /// <inheritdoc/>
-    public bool TryGetValue(TRight right, out TLeft left)
+    public bool TryGetValue(TRight right, out TLeft? left)
         => _reverseLookup.TryGetValue(right, out left);
 
     /// <inheritdoc/>

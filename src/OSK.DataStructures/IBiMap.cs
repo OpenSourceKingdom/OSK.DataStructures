@@ -60,7 +60,7 @@ public interface IBiMap<TLeft, TRight>: IEnumerable<MapEntry<TLeft, TRight>>
     /// <param name="left">The left to get the right.</param>
     /// <param name="right">The right.</param>
     /// <returns>Returns <see langword="true"/> if the key finds a lookup entry, <see langword="false"/> otherwise.</returns>
-    public bool TryGetEntry(TLeft left, out TRight right);
+    public bool TryGetEntry(TLeft left, out TRight? right);
 
     /// <summary>
     /// Attempts to get the left using the right entry.
@@ -68,7 +68,7 @@ public interface IBiMap<TLeft, TRight>: IEnumerable<MapEntry<TLeft, TRight>>
     /// <param name="left">The right to get the left.</param>
     /// <param name="right">The left.</param>
     /// <returns>Returns <see langword="true"/> if the value finds a lookup entry, <see langword="false"/> otherwise.</returns>
-    public bool TryGetValue(TRight right, out TLeft left);
+    public bool TryGetValue(TRight right, out TLeft? left);
 
     /// <summary>
     /// Removes an entry using the left.
