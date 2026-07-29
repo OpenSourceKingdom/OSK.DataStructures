@@ -24,4 +24,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OSK.DataStructures\OSK.DataStructures.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -36,38 +36,34 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
 
     public int CurrentIndex { get; private set; }
 
-    public bool HasNext => WrapNavigation || CurrentIndex < _items.Count;
+    public bool HasNext => WrapNavigation || CurrentIndex < _items.Count - 1;
 
     public bool HasPrevious => WrapNavigation || CurrentIndex > 0;
 
     public bool Next()
     {
-        if (!WrapNavigation && CurrentIndex >= Count)
+        if (!WrapNavigation && CurrentIndex >= Count - 1)
         {
             return false;
         }
 
-        CurrentIndex++;
-        if (CurrentIndex >= Count)
-        {
-            CurrentIndex = 0;
-        }
+        CurrentIndex = CurrentIndex >= Count - 1
+            ? WrapNavigation ? 0 : CurrentIndex
+            : CurrentIndex + 1;
 
         return true;
     }
 
     public bool Previous()
     {
-        if (!WrapNavigation && CurrentIndex is 0)
+        if (!WrapNavigation && CurrentIndex <= 0)
         {
             return false;
         }
 
-        CurrentIndex--;
-        if (CurrentIndex < 0)
-        {
-            CurrentIndex = _items.Count - 1;
-        }
+        CurrentIndex = CurrentIndex <= 0
+            ? WrapNavigation ? Count - 1 : 0
+            : CurrentIndex - 1;
 
         return true;
     }
