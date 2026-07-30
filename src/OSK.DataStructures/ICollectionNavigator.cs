@@ -1,4 +1,7 @@
-﻿namespace OSK.DataStructures;
+﻿using OSK.DataStructures.Events;
+using System;
+
+namespace OSK.DataStructures;
 
 /// <summary>
 /// A navigator over a collection of items
@@ -6,6 +9,11 @@
 /// <typeparam name="T">The data type the collection contains</typeparam>
 public interface ICollectionNavigator<T>
 {
+    /// <summary>
+    /// An event triggered when navigation occurs
+    /// </summary>
+    event Action<CollectionNavigationEvent<T>>? Navigated;
+
     /// <summary>
     /// Describes that navigator behavior if an end of the collection has been reached (i.e. start or finish). If set, the navigator will wrap around to the other end of the collection
     /// </summary>
