@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OSK.DataStructures.Events;
+using System;
 using System.Collections.Generic;
 
 namespace OSK.DataStructures;
@@ -29,13 +30,16 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
     #region ICollectionNavigator
 
     /// <inheritdoc/>
+    public event Action<CollectionNavigationEvent<T>>? Navigated;
+
+    /// <inheritdoc/>
     public bool WrapNavigation { get; }
 
     /// <inheritdoc/>
     public int Count => _items.Count;
 
     /// <inheritdoc/>
-    public T? Current => _items[CurrentIndex];
+    public T? Current => Count is 0 ? default : _items[CurrentIndex];
 
     /// <inheritdoc/>
     public int CurrentIndex { get; private set; }
@@ -58,6 +62,8 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
             ? WrapNavigation ? 0 : CurrentIndex
             : CurrentIndex + 1;
 
+        TryPublishNavigationEvent();
+
         return true;
     }
 
@@ -73,6 +79,8 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
             ? WrapNavigation ? Count - 1 : 0
             : CurrentIndex - 1;
 
+        TryPublishNavigationEvent();
+
         return true;
     }
 
@@ -85,7 +93,24 @@ public class CollectionNavigator<T>: ICollectionNavigator<T>
         }
 
         CurrentIndex = index;
+
+        TryPublishNavigationEvent();
+
         return true;
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private void TryPublishNavigationEvent()
+    {
+        Navigated?.Invoke(new()
+        {
+            Current = Current!,
+            CurrentIndex = CurrentIndex,
+            TotalItems = Count
+        });
     }
 
     #endregion

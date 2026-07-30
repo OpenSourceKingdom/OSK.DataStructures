@@ -1,4 +1,7 @@
-﻿namespace OSK.DataStructures.UnitTests;
+﻿using System.Collections.Generic;
+using OSK.DataStructures.Events;
+
+namespace OSK.DataStructures.UnitTests;
 
 public class CollectionNavigatorTests
 {
@@ -62,8 +65,15 @@ public class CollectionNavigatorTests
         Assert.Equal(2, navigator.Count);
         Assert.Equal("a", navigator.Current);
         Assert.Equal(0, navigator.CurrentIndex);
-        Assert.Equal(wrap, navigator.HasPrevious);
         Assert.True(navigator.HasNext);
+        if (wrap)
+        {
+            Assert.True(navigator.HasPrevious);
+        }
+        else
+        {
+            Assert.False(navigator.HasPrevious);
+        }
     }
 
     #endregion
@@ -154,6 +164,16 @@ public class CollectionNavigatorTests
         Assert.Equal("c", navigator.Current);
     }
 
+    [Fact]
+    public void Current_EmptyCollection_ReturnsDefault()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(Array.Empty<string>());
+
+        // Act & Assert
+        Assert.Null(navigator.Current);
+    }
+
     #endregion
 
     #region CurrentIndex
@@ -224,26 +244,19 @@ public class CollectionNavigatorTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void HasNext_AtEnd_ReturnsExpected(bool wrap)
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void HasNext_AtEnd_ReturnsExpected(bool wrap, bool expected)
     {
         // Arrange
         var navigator = new CollectionNavigator<string>(_items, wrap);
-        for (int i = 0; i < _items.Count; i++)
+        for (int i = 0; i < _items.Count - 1; i++)
         {
             navigator.Next();
         }
 
         // Act & Assert
-        if (wrap)
-        {
-            Assert.True(navigator.HasNext);
-        }
-        else
-        {
-            Assert.False(navigator.HasNext);
-        }
+        Assert.Equal(expected, navigator.HasNext);
     }
 
     #endregion
@@ -261,22 +274,31 @@ public class CollectionNavigatorTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void HasPrevious_AtStart_ReturnsExpected(bool wrap)
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void HasPrevious_AtEnd_ReturnsExpected(bool wrap, bool expected)
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items, wrap);
+        for (int i = 0; i < _items.Count - 1; i++)
+        {
+            navigator.Next();
+        }
+
+        // Act & Assert
+        Assert.Equal(expected, navigator.HasPrevious);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void HasPrevious_AtStart_ReturnsExpected(bool wrap, bool expected)
     {
         // Arrange
         var navigator = new CollectionNavigator<string>(_items, wrap);
 
         // Act & Assert
-        if (wrap)
-        {
-            Assert.True(navigator.HasPrevious);
-        }
-        else
-        {
-            Assert.False(navigator.HasPrevious);
-        }
+        Assert.Equal(expected, navigator.HasPrevious);
     }
 
     #endregion
@@ -319,7 +341,7 @@ public class CollectionNavigatorTests
     {
         // Arrange
         var navigator = new CollectionNavigator<string>(_items, false);
-        for (int i = 0; i < _items.Count; i++)
+        for (int i = 0; i < _items.Count - 1; i++)
         {
             navigator.Next();
         }
@@ -511,7 +533,10 @@ public class CollectionNavigatorTests
     public void TryNavigate_ValidIndex_NavigatesSuccessfully(int index)
     {
         // Arrange
+        var raisedEvent = false;
         var navigator = new CollectionNavigator<string>(_items);
+
+        navigator.Navigated += _ => raisedEvent = true;
 
         // Act
         var result = navigator.TryNavigate(index);
@@ -520,6 +545,7 @@ public class CollectionNavigatorTests
         Assert.True(result);
         Assert.Equal(_items[index], navigator.Current);
         Assert.Equal(index, navigator.CurrentIndex);
+        Assert.True(raisedEvent);
     }
 
     [Theory]
@@ -570,7 +596,7 @@ public class CollectionNavigatorTests
     {
         // Arrange
         var navigator = new CollectionNavigator<string>(_items);
-        for (int i = 0; i < _items.Count; i++)
+        for (int i = 0; i < _items.Count - 1; i++)
         {
             navigator.Next();
         }
@@ -600,6 +626,203 @@ public class CollectionNavigatorTests
 
         // Assert
         Assert.Equal(wrap, navigator.WrapNavigation);
+    }
+
+    #endregion
+
+    #region Navigated
+
+    [Fact]
+    public void Navigated_OnNext_FiresWithCorrectPayload()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items);
+        CollectionNavigationEvent<string>? capturedEvent = null;
+        navigator.Navigated += @event => capturedEvent = @event;
+
+        // Act
+        navigator.Next();
+
+        // Assert
+        Assert.NotNull(capturedEvent);
+        Assert.Equal("b", capturedEvent.Current);
+        Assert.Equal(1, capturedEvent.CurrentIndex);
+        Assert.Equal(5, capturedEvent.TotalItems);
+    }
+
+    [Fact]
+    public void Navigated_OnPrevious_FiresWithCorrectPayload()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items);
+        for (int i = 0; i < _items.Count - 1; i++)
+        {
+            navigator.Next();
+        }
+
+        CollectionNavigationEvent<string>? capturedEvent = null;
+        navigator.Navigated += @event => capturedEvent = @event;
+
+        // Act
+        navigator.Previous();
+
+        // Assert
+        Assert.NotNull(capturedEvent);
+        Assert.Equal(_items[_items.Count - 2], capturedEvent.Current);
+        Assert.Equal(_items.Count - 2, capturedEvent.CurrentIndex);
+        Assert.Equal(5, capturedEvent.TotalItems);
+    }
+
+    [Fact]
+    public void Navigated_OnTryNavigate_FiresWithCorrectPayload()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items);
+        CollectionNavigationEvent<string>? capturedEvent = null;
+        navigator.Navigated += @event => capturedEvent = @event;
+
+        // Act
+        navigator.TryNavigate(3);
+
+        // Assert
+        Assert.NotNull(capturedEvent);
+        Assert.Equal("d", capturedEvent.Current);
+        Assert.Equal(3, capturedEvent.CurrentIndex);
+        Assert.Equal(5, capturedEvent.TotalItems);
+    }
+
+    [Fact]
+    public void Navigated_OnWrapNavigation_FiresWithCorrectPayload()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items, true);
+        for (int i = 0; i < _items.Count - 1; i++)
+        {
+            navigator.Next();
+        }
+
+        CollectionNavigationEvent<string>? capturedEvent = null;
+        navigator.Navigated += @event => capturedEvent = @event;
+
+        // Act
+        navigator.Next();
+
+        // Assert
+        Assert.NotNull(capturedEvent);
+        Assert.Equal("a", capturedEvent.Current);
+        Assert.Equal(0, capturedEvent.CurrentIndex);
+        Assert.Equal(5, capturedEvent.TotalItems);
+    }
+
+    [Fact]
+    public void Navigated_OnWrapPrevious_FiresWithCorrectPayload()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items, true);
+
+        CollectionNavigationEvent<string>? capturedEvent = null;
+        navigator.Navigated += @event => capturedEvent = @event;
+
+        // Act
+        navigator.Previous();
+
+        // Assert
+        Assert.NotNull(capturedEvent);
+        Assert.Equal("e", capturedEvent.Current);
+        Assert.Equal(4, capturedEvent.CurrentIndex);
+        Assert.Equal(5, capturedEvent.TotalItems);
+    }
+
+    [Fact]
+    public void Navigated_OnFailedNext_DoesNotFire()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items, false);
+        for (int i = 0; i < _items.Count - 1; i++)
+        {
+            navigator.Next();
+        }
+
+        int callCount = 0;
+        navigator.Navigated += @event => callCount++;
+
+        // Act
+        navigator.Next();
+
+        // Assert
+        Assert.Equal(0, callCount);
+    }
+
+    [Fact]
+    public void Navigated_OnFailedPrevious_DoesNotFire()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items, false);
+
+        int callCount = 0;
+        navigator.Navigated += @event => callCount++;
+
+        // Act
+        navigator.Previous();
+
+        // Assert
+        Assert.Equal(0, callCount);
+    }
+
+    [Fact]
+    public void Navigated_OnFailedTryNavigate_DoesNotFire()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items);
+
+        int callCount = 0;
+        navigator.Navigated += @event => callCount++;
+
+        // Act
+        navigator.TryNavigate(100);
+
+        // Assert
+        Assert.Equal(0, callCount);
+    }
+
+    [Fact]
+    public void Navigated_OnMultipleNavigations_FiresEachTime()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(_items);
+        int callCount = 0;
+
+        var multiDelegateFired = false;
+
+        navigator.Navigated += @event => callCount++;
+        navigator.Navigated += _ => multiDelegateFired = true;
+
+        // Act
+        navigator.Next();
+        navigator.Next();
+        navigator.Previous();
+        navigator.TryNavigate(4);
+
+        // Assert
+        Assert.Equal(4, callCount);
+        Assert.True(multiDelegateFired);
+    }
+
+    [Fact]
+    public void Navigated_EmptyCollection_OnFailedNavigation_DoesNotFire()
+    {
+        // Arrange
+        var navigator = new CollectionNavigator<string>(Array.Empty<string>());
+
+        int callCount = 0;
+        navigator.Navigated += @event => callCount++;
+
+        // Act
+        navigator.Next();
+        navigator.Previous();
+
+        // Assert
+        Assert.Equal(0, callCount);
     }
 
     #endregion
