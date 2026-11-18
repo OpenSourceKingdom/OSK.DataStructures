@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using OSK.DataStructures.Events;
+﻿using OSK.DataStructures.Events;
 
 namespace OSK.DataStructures.UnitTests;
 
